@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const zeroPad = (value) => value.toString().padStart(2, '0');
 
     const formatDate = (json) => {
-        return `${json.Ano}-${zeroPad(json['Mês'] - 1)}-${zeroPad(json.Dia)}T${zeroPad(json.Hora)}:${zeroPad(json.Minutos)}:00`;
+        return `${json.Ano}-${zeroPad(json['Mês'])}-${zeroPad(json.Dia)}T${zeroPad(json.Hora)}:${zeroPad(json.Minutos)}:00`;
     };
 
     const fetchDate = async () => {
@@ -23,8 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const updateDisplay = (duration) => {
-        const { months, days, hours, minutes, seconds } = calculateTime(duration);
+    const updateDisplay = (months, days, hours, minutes, seconds) => {
         segundosElem.textContent = zeroPad(seconds);
         minutosElem.textContent = zeroPad(minutes);
         horasElem.textContent = zeroPad(hours);
@@ -34,17 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const calculateTime = (duration) => {
-        const totalSeconds = Math.floor(duration / 1000);
-        const seconds = totalSeconds % 60;
-        const totalMinutes = Math.floor(totalSeconds / 60);
-        const minutes = totalMinutes % 60;
-        const totalHours = Math.floor(totalMinutes / 60);
-        const hours = totalHours % 24;
-        const totalDays = Math.floor(totalHours / 24);
-        const months = Math.floor(totalDays / 30); // Simplificação, pois meses variam em dias
-        const days = totalDays % 30;
+        const seconds = Math.floor((duration / 1000) % 60);
+        const minutes = Math.floor((duration / (1000 * 60)) % 60);
+        const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+        const days = Math.floor((duration / (1000 * 60 * 60 * 24)) % 30);
+        const months = Math.floor(duration / (1000 * 60 * 60 * 24 * 30));
 
-        return { months, days, hours, minutes, seconds };
+        return [months, days, hours, minutes, seconds];
     };
 
     const startCountdown = () => {
@@ -55,10 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (duration <= 0) {
                     clearInterval(countdownInterval);
-                    updateDisplay(0);
+                    updateDisplay(0, 0, 0, 0, 0);
                     mesesElem.nextElementSibling.textContent = 'Tempo Expirado';
                 } else {
-                    updateDisplay(duration);
+                    const [months, days, hours, minutes, seconds] = calculateTime(duration);
+                    updateDisplay(months, days, hours, minutes, seconds);
                 }
             }
         }, 1000);
