@@ -4,16 +4,24 @@ function calculateTimeDifference(startDate, endDate) {
     const msInMinute = 60 * msInSecond;
     const msInHour = 60 * msInMinute;
     const msInDay = 24 * msInHour;
-    const msInMonth = 30 * msInDay; // Aproximação, para mais precisão use a biblioteca moment.js ou similar
+    
+    let timeDifference = endDate - startDate;
 
-    const timeDifference = endDate - startDate;
+    // Calcula a diferença em dias, horas, minutos e segundos
+    const days = Math.floor(timeDifference / msInDay);
+    timeDifference -= days * msInDay;
 
-    const months = Math.floor(timeDifference / msInMonth);
-    const days = Math.floor((timeDifference % msInMonth) / msInDay);
-    const hours = Math.floor((timeDifference % msInDay) / msInHour);
-    const minutes = Math.floor((timeDifference % msInHour) / msInMinute);
-    const seconds = Math.floor((timeDifference % msInMinute) / msInSecond);
+    const hours = Math.floor(timeDifference / msInHour);
+    timeDifference -= hours * msInHour;
 
+    const minutes = Math.floor(timeDifference / msInMinute);
+    timeDifference -= minutes * msInMinute;
+
+    const seconds = Math.floor(timeDifference / msInSecond);
+
+    // Calcula a diferença em meses (simplificado como o número de meses completos entre as datas)
+    const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 + endDate.getMonth() - startDate.getMonth();
+    
     return { months, days, hours, minutes, seconds };
 }
 
