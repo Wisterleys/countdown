@@ -16,7 +16,7 @@ function zero(value) {
 }
 
 function format(json) {
-    return `${json.Ano}-${zero(json['Mês'])}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`;
+    return `${json.Ano}-${zero(json['Mês'] - 1)}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`;
 }
 
 function getJson() {
@@ -24,8 +24,7 @@ function getJson() {
     AJAX.open("GET", "lancamento.json");
     AJAX.send();
     AJAX.onload = function() {
-        const json = JSON.parse(AJAX.responseText);
-        input_date = format(json);
+        input_date = format(JSON.parse(AJAX.responseText));
     };
 }
 
@@ -63,9 +62,7 @@ function formatsDate(duration) {
     const horasTotais = Math.floor(minutosTotais / 60);
     const horas = horasTotais % 24;
     const diasTotais = Math.floor(horasTotais / 24);
-    
-    // Considerando aproximadamente 30 dias em um mês
-    const meses = Math.floor(diasTotais / 30);
+    const meses = Math.floor(diasTotais / 30); // Aproximadamente 30 dias por mês
     const diasRestantes = diasTotais % 30;
 
     return [zero(meses), zero(diasRestantes), zero(horas), zero(minutos), zero(segundos)];
