@@ -16,7 +16,8 @@ function zero(value) {
 }
 
 function format(json) {
-    return `${json.Ano}-${zero(json['Mês'] - 1)}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`; // Ajuste mês - 1 porque os meses são baseados em 0
+    // Ajuste o mês para o índice correto (0-11) e mantenha a hora em formato de 24 horas
+    return `${json.Ano}-${zero(json['Mês'] - 1)}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`;
 }
 
 function getJson() {
