@@ -1,31 +1,28 @@
-// Data alvo
-const targetDate = new Date(2024, 7, 5, 3, 40, 0); // Lembre-se que os meses em JavaScript são baseados em zero (0 = Janeiro)
+// Função para calcular a diferença entre duas datas
+function calculateTimeDifference(startDate, endDate) {
+    const msInSecond = 1000;
+    const msInMinute = 60 * msInSecond;
+    const msInHour = 60 * msInMinute;
+    const msInDay = 24 * msInHour;
+    const msInMonth = 30 * msInDay; // Aproximação, para mais precisão use a biblioteca moment.js ou similar
+
+    const timeDifference = endDate - startDate;
+
+    const months = Math.floor(timeDifference / msInMonth);
+    const days = Math.floor((timeDifference % msInMonth) / msInDay);
+    const hours = Math.floor((timeDifference % msInDay) / msInHour);
+    const minutes = Math.floor((timeDifference % msInHour) / msInMinute);
+    const seconds = Math.floor((timeDifference % msInMinute) / msInSecond);
+
+    return { months, days, hours, minutes, seconds };
+}
 
 // Função para atualizar o countdown
 function updateCountdown() {
     const now = new Date();
-    const timeDifference = targetDate - now;
+    const targetDate = new Date(2024, 7, 5, 3, 40, 0); // Data alvo
 
-    if (timeDifference <= 0) {
-        // Se o tempo já passou, exibe 0 em todos os campos
-        meses.textContent = 0;
-        dias.textContent = 0;
-        horas.textContent = 0;
-        minutos.textContent = 0;
-        segundos.textContent = 0;
-        return;
-    }
-
-    const secondsInMonth = 30 * 24 * 60 * 60 * 1000; // Aproximadamente 30 dias por mês
-    const secondsInDay = 24 * 60 * 60 * 1000;
-    const secondsInHour = 60 * 60 * 1000;
-    const secondsInMinute = 60 * 1000;
-
-    const months = Math.floor(timeDifference / secondsInMonth);
-    const days = Math.floor((timeDifference % secondsInMonth) / secondsInDay);
-    const hours = Math.floor((timeDifference % secondsInDay) / secondsInHour);
-    const minutes = Math.floor((timeDifference % secondsInHour) / secondsInMinute);
-    const seconds = Math.floor((timeDifference % secondsInMinute) / 1000);
+    const { months, days, hours, minutes, seconds } = calculateTimeDifference(now, targetDate);
 
     // Atualiza os elementos HTML
     meses.textContent = months;
@@ -34,6 +31,13 @@ function updateCountdown() {
     minutos.textContent = minutes;
     segundos.textContent = seconds;
 }
+
+// Seleciona os elementos HTML
+let meses = document.querySelector('#meses');
+let dias = document.querySelector('#dias');
+let horas = document.querySelector('#horas');
+let minutos = document.querySelector('#minutos');
+let segundos = document.querySelector('#segundos');
 
 // Atualiza o countdown a cada segundo
 setInterval(updateCountdown, 1000);
