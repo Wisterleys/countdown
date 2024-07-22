@@ -1,27 +1,34 @@
 // Função para calcular a diferença entre duas datas
 function calculateTimeDifference(startDate, endDate) {
-    const msInSecond = 1000;
-    const msInMinute = 60 * msInSecond;
-    const msInHour = 60 * msInMinute;
-    const msInDay = 24 * msInHour;
-    
-    let timeDifference = endDate - startDate;
+    // Verifica se a data de início é após a data final
+    if (startDate > endDate) {
+        return { months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
 
-    // Calcula a diferença em dias, horas, minutos e segundos
-    const days = Math.floor(timeDifference / msInDay);
-    timeDifference -= days * msInDay;
+    let months = endDate.getMonth() - startDate.getMonth() + (12 * (endDate.getFullYear() - startDate.getFullYear()));
+    let days = Math.floor((endDate - new Date(startDate.getFullYear(), startDate.getMonth() + months, startDate.getDate())) / (24 * 60 * 60 * 1000));
+    let hours = endDate.getHours() - startDate.getHours();
+    let minutes = endDate.getMinutes() - startDate.getMinutes();
+    let seconds = endDate.getSeconds() - startDate.getSeconds();
 
-    const hours = Math.floor(timeDifference / msInHour);
-    timeDifference -= hours * msInHour;
+    // Ajusta o cálculo se os valores de horas, minutos ou segundos forem negativos
+    if (seconds < 0) {
+        seconds += 60;
+        minutes -= 1;
+    }
+    if (minutes < 0) {
+        minutes += 60;
+        hours -= 1;
+    }
+    if (hours < 0) {
+        hours += 24;
+        days -= 1;
+    }
+    if (days < 0) {
+        days += new Date(startDate.getFullYear(), startDate.getMonth() + months, 0).getDate(); // Ajusta para o número de dias no mês
+        months -= 1;
+    }
 
-    const minutes = Math.floor(timeDifference / msInMinute);
-    timeDifference -= minutes * msInMinute;
-
-    const seconds = Math.floor(timeDifference / msInSecond);
-
-    // Calcula a diferença em meses (simplificado como o número de meses completos entre as datas)
-    const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 + endDate.getMonth() - startDate.getMonth();
-    
     return { months, days, hours, minutes, seconds };
 }
 
