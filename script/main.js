@@ -1,61 +1,68 @@
-let meses = document.querySelector('#meses');
-let dias = document.querySelector('#dias');
-let horas = document.querySelector('#horas');
-let minutos = document.querySelector('#minutos');
-let segundos = document.querySelector('#segundos');
-let clock;
-let input_date = false;
+document.addEventListener('DOMContentLoaded', () => {
+    const mesesElem = document.querySelector('#meses');
+    const diasElem = document.querySelector('#dias');
+    const horasElem = document.querySelector('#horas');
+    const minutosElem = document.querySelector('#minutos');
+    const segundosElem = document.querySelector('#segundos');
+    let countdownInterval;
+    let targetDate = null;
 
-function zero(value) {
-    return value < 10 ? "0" + value : value;
-}
+    const zeroPad = (value) => value.toString().padStart(2, '0');
 
-function format(json) {
-    return `${json.Ano}-${zero(json['Mês'])}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}:00`;
-}
+    const formatDate = (json) => {
+        return `${json.Ano}-${zeroPad(json['Mês'])}-${zeroPad(json.Dia)}T${zeroPad(json.Hora)}:${zeroPad(json.Minutos)}:00`;
+    };
 
-function getJson() {
-    const AJAX = new XMLHttpRequest();
-    AJAX.open("GET", "lancamento.json");
-    AJAX.send();
-    AJAX.onload = function () {
-        input_date = format(JSON.parse(AJAX.responseText));
-    }
-}
-
-function timer() {
-    if (input_date) {
-        let duration = new Date(input_date) - new Date();
-        if (duration <= 0) {
-            clearInterval(clock);
-            segundos.innerHTML = '00';
-            minutos.innerHTML = '00';
-            horas.innerHTML = '00';
-            dias.innerHTML = '00';
-            meses.innerHTML = '00';
-            meses.parentNode.querySelector("p").innerHTML = "Tempo Expirado";
-            return;
+    const fetchDate = async () => {
+        try {
+            const response = await fetch('lancamento.json');
+            const json = await response.json();
+            targetDate = new Date(formatDate(json));
+        } catch (error) {
+            console.error('Error fetching date:', error);
         }
-        let format = formatsDate(duration);
-        segundos.innerHTML = format[4];
-        minutos.innerHTML = format[3];
-        horas.innerHTML = format[2];
-        dias.innerHTML = format[1];
-        meses.innerHTML = format[0];
-        meses.parentNode.querySelector("p").innerHTML = format[0] < 2 ? "Mês" : "Meses";
-    }
-}
+    };
 
-function formatsDate(duration) {
-    let s = parseInt((duration / 1000) % 60);
-    let m = parseInt((duration / (1000 * 60)) % 60);
-    let h = parseInt((duration / (1000 * 60 * 60)) % 24);
-    let d = parseInt((duration / (1000 * 60 * 60 * 24)) % 30);
-    let mes = parseInt(duration / (1000 * 60 * 60 * 24 * 30));
-    return [mes, d, zero(h), zero(m), zero(s)];
-}
+    const updateDisplay = (duration) => {
+        const [months, days, hours, minutes, seconds] = calculateTime(duration);
+        segundosElem.textContent = seconds;
+        minutosElem.textContent = minutes;
+        horasElem.textContent = hours;
+        diasElem.textContent = days;
+        mesesElem.textContent = months;
+        mesesElem.nextElementSibling.textContent = months < 2 ? 'Mês' : 'Meses';
+    };
 
-(function (){
-    clock = setInterval(timer, 1000);
-    getJson();
-})();
+    const calculateTime = (duration) => {
+        const s = Math.floor((duration / 1000) % 60);
+        const m = Math.floor((duration / (1000 * 60)) % 60);
+        const h = Math.floor((duration / (1000 * 60 * 60)) % 24);
+        const d = Math.floor((duration / (1000 * 60 * 60 * 24)) % 30);
+        const months = Math.floor(duration / (1000 * 60 * 60 * 24 * 30));
+        return [zeroPad(months), zeroPad(d), zeroPad(h), zeroPad(m), zeroPad(s)];
+    };
+
+    const startCountdown = () => {
+        countdownInterval = setInterval(() => {
+            if (targetDate) {
+                const now = new Date();
+                const duration = targetDate - now;
+
+                if (duration <= 0) {
+                    clearInterval(countdownInterval);
+                    updateDisplay(0);
+                    mesesElem.nextElementSibling.textContent = 'Tempo Expirado';
+                } else {
+                    updateDisplay(duration);
+                }
+            }
+        }, 1000);
+    };
+
+    const initialize = async () => {
+        await fetchDate();
+        startCountdown();
+    };
+
+    initialize();
+});
