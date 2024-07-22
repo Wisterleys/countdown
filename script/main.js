@@ -4,7 +4,7 @@ let horas = document.querySelector('#horas');
 let minutos = document.querySelector('#minutos');
 let segundos = document.querySelector('#segundos');
 let clock;
-let input_date = false;
+let inputDate = null;
 
 function start() {
     clock = setInterval(timer, 1000);
@@ -16,7 +16,7 @@ function zero(value) {
 }
 
 function format(json) {
-    return `${json.Ano}-${zero(json['Mês'])}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`;
+    return `${json.Ano}-${zero(json['Mês'] - 1)}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`; // Ajuste mês - 1 porque os meses são baseados em 0
 }
 
 function getJson() {
@@ -24,15 +24,15 @@ function getJson() {
     AJAX.open("GET", "lancamento.json");
     AJAX.send();
     AJAX.onload = function() {
-        input_date = format(JSON.parse(AJAX.responseText));
+        const data = JSON.parse(AJAX.responseText);
+        inputDate = new Date(format(data));
     };
 }
 
 function timer() {
-    if (input_date) {
-        const targetDate = new Date(input_date);
+    if (inputDate) {
         const now = new Date();
-        const duration = targetDate - now;
+        const duration = inputDate - now;
 
         if (duration <= 0) {
             clearInterval(clock);
@@ -44,24 +44,34 @@ function timer() {
             return;
         }
 
-        const format = formatsDate(duration);
-        segundos.innerHTML = format[4];
-        minutos.innerHTML = format[3];
-        horas.innerHTML = format[2];
-        dias.innerHTML = format[1];
-        meses.innerHTML = format[0];
-        meses.parentNode.querySelector("p").innerHTML = format[0] < 2 ? "Mês" : "Meses";
+        const timeComponents = getTimeComponents(duration);
+        segundos.innerHTML = timeComponents.seconds;
+        minutos.innerHTML = timeComponents.minutes;
+        horas.innerHTML = timeComponents.hours;
+        dias.innerHTML = timeComponents.days;
+        meses.innerHTML = timeComponents.months;
+        meses.parentNode.querySelector("p").innerHTML = timeComponents.months < 2 ? "Mês" : "Meses";
     }
 }
 
-function formatsDate(duration) {
-    let s = parseInt((duration / 1000) % 60);
-    let m = parseInt((duration / 1000 / 60) % 60);
-    let h = parseInt((duration / 1000 / 60 / 60) % 24);
-    let d = parseInt(duration / 1000 / 60 / 60 / 24) % 30;
-    let mes = parseInt(duration / 1000 / 60 / 60 / 24 / 30);
+function getTimeComponents(duration) {
+    const totalSeconds = Math.floor(duration / 1000);
+    const seconds = totalSeconds % 60;
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const minutes = totalMinutes % 60;
+    const totalHours = Math.floor(totalMinutes / 60);
+    const hours = totalHours % 24;
+    const totalDays = Math.floor(totalHours / 24);
+    const months = Math.floor(totalDays / 30); // Aproximação para meses
+    const days = totalDays % 30;
 
-    return [zero(mes), zero(d), zero(h), zero(m), zero(s)];
+    return {
+        months: zero(months),
+        days: zero(days),
+        hours: zero(hours),
+        minutes: zero(minutes),
+        seconds: zero(seconds)
+    };
 }
 
 start();
