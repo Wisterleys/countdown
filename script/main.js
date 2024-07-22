@@ -1,71 +1,39 @@
-let meses = document.querySelector('#meses');
-let dias = document.querySelector('#dias');
-let horas = document.querySelector('#horas');
-let minutos = document.querySelector('#minutos');
-let segundos = document.querySelector('#segundos');
-let clock;
-let input_date = false;
+// Data alvo
+const targetDate = new Date(2024, 7, 5, 3, 40, 0); // Lembre-se que os meses em JavaScript são baseados em zero (0 = Janeiro)
 
-function start() {
-    clock = setInterval(timer, 1000);
-    getJson();
-}
+// Função para atualizar o countdown
+function updateCountdown() {
+    const now = new Date();
+    const timeDifference = targetDate - now;
 
-function zero(value) {
-    return value < 10 ? "0" + value : value;
-}
-
-function format(json) {
-    return `${json.Ano}-${zero(json['Mês'] - 1)}-${zero(json.Dia)}T${zero(json.Hora)}:${zero(json.Minutos)}`;
-}
-
-function getJson() {
-    const AJAX = new XMLHttpRequest();
-    AJAX.open("GET", "lancamento.json");
-    AJAX.send();
-    AJAX.onload = function() {
-        input_date = format(JSON.parse(AJAX.responseText));
-    };
-}
-
-function timer() {
-    if (input_date) {
-        const targetDate = new Date(input_date);
-        const now = new Date();
-        const duration = targetDate - now;
-
-        if (duration <= 0) {
-            clearInterval(clock);
-            meses.innerHTML = "00";
-            dias.innerHTML = "00";
-            horas.innerHTML = "00";
-            minutos.innerHTML = "00";
-            segundos.innerHTML = "00";
-            return;
-        }
-
-        const format = formatsDate(duration);
-        segundos.innerHTML = format[4];
-        minutos.innerHTML = format[3];
-        horas.innerHTML = format[2];
-        dias.innerHTML = format[1];
-        meses.innerHTML = format[0];
-        meses.parentNode.querySelector("p").innerHTML = format[0] < 2 ? "Mês" : "Meses";
+    if (timeDifference <= 0) {
+        // Se o tempo já passou, exibe 0 em todos os campos
+        meses.textContent = 0;
+        dias.textContent = 0;
+        horas.textContent = 0;
+        minutos.textContent = 0;
+        segundos.textContent = 0;
+        return;
     }
+
+    const secondsInMonth = 30 * 24 * 60 * 60 * 1000; // Aproximadamente 30 dias por mês
+    const secondsInDay = 24 * 60 * 60 * 1000;
+    const secondsInHour = 60 * 60 * 1000;
+    const secondsInMinute = 60 * 1000;
+
+    const months = Math.floor(timeDifference / secondsInMonth);
+    const days = Math.floor((timeDifference % secondsInMonth) / secondsInDay);
+    const hours = Math.floor((timeDifference % secondsInDay) / secondsInHour);
+    const minutes = Math.floor((timeDifference % secondsInHour) / secondsInMinute);
+    const seconds = Math.floor((timeDifference % secondsInMinute) / 1000);
+
+    // Atualiza os elementos HTML
+    meses.textContent = months;
+    dias.textContent = days;
+    horas.textContent = hours;
+    minutos.textContent = minutes;
+    segundos.textContent = seconds;
 }
 
-function formatsDate(duration) {
-    const segundosTotais = Math.floor(duration / 1000);
-    const segundos = segundosTotais % 60;
-    const minutosTotais = Math.floor(segundosTotais / 60);
-    const minutos = minutosTotais % 60;
-    const horasTotais = Math.floor(minutosTotais / 60);
-    const horas = horasTotais % 24;
-    const diasTotais = Math.floor(horasTotais / 24);
-    const meses = Math.floor(diasTotais / 30); // Aproximadamente 30 dias por mês
-    const diasRestantes = diasTotais % 30;
-
-    return [zero(meses), zero(diasRestantes), zero(horas), zero(minutos), zero(segundos)];
-}
-
-start();
+// Atualiza o countdown a cada segundo
+setInterval(updateCountdown, 1000);
