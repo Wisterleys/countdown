@@ -38,11 +38,27 @@ function timer(){
 }
  
 start()
-function formatsDate(duration){
-    let s = isNaN(duration)?0:parseInt(((duration/1000)%60))
-    let m = isNaN(duration)?0:parseInt(((duration/1000/60)%60))
-    let h = isNaN(duration)?0:parseInt(((duration/1000/60/60)%24))
-    let d = isNaN(duration)?0:parseInt(((duration/1000/60/60/24)%24))
-    let mes = isNaN(duration)?0:parseInt(((duration/1000/60/60/24/30)))
-    return [mes,d, h<10?h<0?"00":"0"+h:h, m<10?m<0?"00":"0"+m:m, s<10?s<0?"00":"0"+s:s]
+function formatsDate(duration) {
+    if (isNaN(duration)) {
+        return [0, 0, "00", "00", "00"];
+    }
+    
+    // Convertendo para valores positivos
+    duration = Math.max(duration, 0);
+    
+    // Calculando cada unidade
+    const seconds = Math.floor((duration / 1000) % 60);
+    const minutes = Math.floor((duration / (1000 * 60)) % 60);
+    const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(duration / (1000 * 60 * 60 * 24)) % 30; // Dias no mês atual
+    const months = Math.floor(duration / (1000 * 60 * 60 * 24 * 30)); // Meses totais
+    
+    // Formatando a saída
+    return [
+        months,
+        days,
+        hours < 10 ? `0${hours}` : hours,
+        minutes < 10 ? `0${minutes}` : minutes,
+        seconds < 10 ? `0${seconds}` : seconds
+    ];
 }
